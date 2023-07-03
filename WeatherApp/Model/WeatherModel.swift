@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 // 응답받은 JSON Decoding을 위한 구조체
 struct WeatherModel {

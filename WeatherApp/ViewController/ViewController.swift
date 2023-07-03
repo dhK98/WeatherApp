@@ -4,44 +4,67 @@ import CoreLocation
 class ViewController: UIViewController {
 
     // MARK: - UIobj
-    @IBOutlet weak var refreshButton: UIButton!
-    
-    @IBOutlet weak var searchButton: UIButton!
-    
-    @IBOutlet weak var weatherImage: UIImageView!
-    
-    @IBOutlet weak var firstNumberLabel: UILabel! {
+    @IBOutlet weak var refreshButton: UIButton! {
         didSet {
-            firstNumberLabel.text = "0"
-            firstNumberLabel.font = UIFont.systemFont(ofSize: 20)
+            refreshButton.setImage(UIImage(systemName: "location"), for: .normal)
+            refreshButton.setTitle("", for: .normal)
         }
     }
     
-    @IBOutlet weak var secondNumberLabel: UILabel! {
+    @IBOutlet weak var searchButton: UIButton! {
         didSet {
-            secondNumberLabel.text = "0"
-            secondNumberLabel.font = UIFont.systemFont(ofSize: 20)
+            searchButton.setImage(UIImage(systemName: "magnifyingglass.circle"), for: .normal)
+            searchButton.setTitle("", for: .normal)
+        }
+        
+    }
+    
+    @IBOutlet weak var weatherImage: UIImageView! {
+        didSet {
+            weatherImage.contentMode = .scaleAspectFit
+        }
+    }
+    
+    @IBOutlet weak var cityTextField: UITextField! {
+        didSet {
+            cityTextField.textAlignment = .right
+            cityTextField.backgroundColor = .white
+            cityTextField.textColor = .black
+        }
+    }
+    
+    @IBOutlet weak var tempLabel: UILabel!{
+        didSet {
+            tempLabel.text = "0"
+            tempLabel.font = UIFont.systemFont(ofSize: 30)
+            tempLabel.textColor = .black
         }
     }
     
     @IBOutlet weak var celsiusTextLabel: UILabel! {
         didSet {
             celsiusTextLabel.text = "°C"
-            celsiusTextLabel.font = UIFont.systemFont(ofSize: 20)
+            celsiusTextLabel.font = UIFont.systemFont(ofSize: 30)
+            celsiusTextLabel.textColor = .black
         }
     }
     
     @IBOutlet weak var cityNameLabel: UILabel! {
         didSet {
-            cityNameLabel.font = UIFont.systemFont(ofSize: 10)
+            cityNameLabel.font = UIFont.systemFont(ofSize: 30)
+            cityNameLabel.text = "My City"
+            cityNameLabel.textColor = .black
         }
     }
     
     @IBAction func refreshApplication(_ sender: Any) {
-        
+        changeRefreshButtonImageTemporarily()
+        self.locationManager.requestLocation()
     }
     
     @IBAction func searchWeatherWithCityname(_ sender: Any) {
+        changeSearchButtonImageTemporarily()
+        self.searchForWeatherByCityname()
     }
     
     // MARK: - logic Manager
@@ -67,75 +90,60 @@ class ViewController: UIViewController {
             
             self.weatherManager.delegate = self
             self.locationManager.delegate = self
+            self.cityTextField.delegate = self
             
             // 위치정보를 가져오는 코드
-            getLocationUsagePermission()
+            self.getLocationUsagePermission()
             
         }
     }
+    
+    // MARK: - recycle function
+    func searchForWeatherByCityname(){
+        guard let cityName = self.cityTextField.text else {return}
+        DispatchQueue.main.async {
+            self.cityTextField.text = ""
+        }
+        if !cityName.isEmpty {
+            self.weatherManager.fetchWeather(cityName: cityName)
+        }
+    }
+    
+    func changeRefreshButtonImageTemporarily(){
+        refreshButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.2){
+            self.refreshButton.setImage(UIImage(systemName: "location"), for: .normal)
+        }
+    }
+    
+    func changeSearchButtonImageTemporarily(){
+        searchButton.setImage(UIImage(systemName: "magnifyingglass.circle.fill"), for: .normal)
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.2){
+            self.searchButton.setImage(UIImage(systemName: "magnifyingglass.circle"), for: .normal)
+        }
+    }
+    
+    
 }
 
-extension ViewController: CLLocationManagerDelegate {
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        guard status != .notDetermined else {
-            print("권한 초기 설정")
-            getLocationUsagePermission()
-            return
+extension ViewController: UITextFieldDelegate {
+    
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        // performance after click the textfield
+        DispatchQueue.main.async {
+            textField.becomeFirstResponder()
         }
-        
-        
-        switch status {
-        case .authorizedAlways, .authorizedWhenInUse:
-            print("GPS 권한 설정됨")
-            self.locationManager.startUpdatingLocation()
-        case .restricted:
-            print("GPS 권한 제한")
-            getLocationUsagePermission()
-        case .denied:
-            print("GPS권한 요청 거부됨")
-            showAuthorizationAlert()
-        default:
-            break
-        }
+        return true
     }
     
-    func showAuthorizationAlert(){
-        let alert = UIAlertController(title: "GPS 권한을 활성화 해주세요.", message: nil, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "닫기", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "설정으로 가기", style: .default){ action in
-            guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url)
-            }
-            
-        })
-        self.present(alert, animated: true)
-    }
-    
-    func getLocationUsagePermission(){
-        self.locationManager.requestWhenInUseAuthorization()
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let location = locations.last {
-            self.locationManager.stopUpdatingLocation()
-            self.weatherManager.fetchWeather(Float(location.coordinate.latitude), lon: Float(location.coordinate.longitude))
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // performance after enter key
+        DispatchQueue.main.async {
+            textField.resignFirstResponder()
         }
-       
+        searchForWeatherByCityname()
+        return true
     }
 }
 
-extension ViewController: WeatherDelegate {
-    func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel) {
-        // UI Obejct Update
-        print("UI obejct updated \(weather.temperature)")
-        return
-    }
-    
-    func didFailWithError(error: Error) {
-        print("Error Message: \(error)")
-        return
-    }
-    
-    
-}
+
