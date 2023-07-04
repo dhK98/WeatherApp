@@ -8,6 +8,7 @@ class ViewController: UIViewController {
         didSet {
             refreshButton.setImage(UIImage(systemName: "location"), for: .normal)
             refreshButton.setTitle("", for: .normal)
+            refreshButton.contentMode = .scaleAspectFit
         }
     }
     
@@ -15,6 +16,7 @@ class ViewController: UIViewController {
         didSet {
             searchButton.setImage(UIImage(systemName: "magnifyingglass.circle"), for: .normal)
             searchButton.setTitle("", for: .normal)
+            searchButton.contentMode = .scaleAspectFit
         }
         
     }
@@ -59,7 +61,7 @@ class ViewController: UIViewController {
     
     @IBAction func refreshApplication(_ sender: Any) {
         changeRefreshButtonImageTemporarily()
-        self.locationManager.requestLocation()
+        self.locationManager.startUpdatingLocation()
     }
     
     @IBAction func searchWeatherWithCityname(_ sender: Any) {
@@ -94,7 +96,6 @@ class ViewController: UIViewController {
             
             // 위치정보를 가져오는 코드
             self.getLocationUsagePermission()
-            
         }
     }
     
@@ -111,14 +112,14 @@ class ViewController: UIViewController {
     
     func changeRefreshButtonImageTemporarily(){
         refreshButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
-        DispatchQueue.main.asyncAfter(deadline: .now()+0.2){
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.1){
             self.refreshButton.setImage(UIImage(systemName: "location"), for: .normal)
         }
     }
     
     func changeSearchButtonImageTemporarily(){
         searchButton.setImage(UIImage(systemName: "magnifyingglass.circle.fill"), for: .normal)
-        DispatchQueue.main.asyncAfter(deadline: .now()+0.2){
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.1){
             self.searchButton.setImage(UIImage(systemName: "magnifyingglass.circle"), for: .normal)
         }
     }

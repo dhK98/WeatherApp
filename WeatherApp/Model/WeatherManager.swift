@@ -29,6 +29,7 @@ class WeatherManager {
     
     func performRequest(with urlString: String){
         // 1. Create a URL
+        print(urlString)
         guard let url = URL(string: urlString) else {
             return
         }

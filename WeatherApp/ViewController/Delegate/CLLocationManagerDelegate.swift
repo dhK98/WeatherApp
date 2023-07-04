@@ -3,23 +3,26 @@ import CoreLocation
 
 extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        guard status != .notDetermined else {
-            print("권한 초기 설정")
-            getLocationUsagePermission()
-            return
-        }
+//        guard status != .notDetermined else {
+//            print("권한 초기 설정")
+//            getLocationUsagePermission()
+//            return
+//        }
         switch status {
-        case .authorizedAlways, .authorizedWhenInUse:
-            print("GPS 권한 설정됨")
-            self.locationManager.startUpdatingLocation()
-        case .restricted, .notDetermined:
-            print("GPS 권한 제한")
-            showAuthorizationAlert()
-        case .denied:
-            print("GPS권한 요청 거부됨")
-            showAuthorizationAlert()
-        default:
-            break
+            case .authorizedAlways, .authorizedWhenInUse:
+                print("GPS 권한 설정됨")
+                self.locationManager.startUpdatingLocation()
+            case .restricted:
+                print("GPS 권한 제한")
+                getLocationUsagePermission()
+            case .denied:
+                print("GPS 권한 요청 거부됨")
+                showAuthorizationAlert()
+            case .notDetermined:
+                print("권한 초기 설정")
+                getLocationUsagePermission()
+            @unknown default:
+                break
         }
     }
     
@@ -36,7 +39,7 @@ extension ViewController: CLLocationManagerDelegate {
     }
     
     func getLocationUsagePermission(){
-        self.locationManager.requestWhenInUseAuthorization()
+        self.locationManager.requestAlwaysAuthorization()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -47,6 +50,6 @@ extension ViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print(error)
+        fatalError("not load location infomation")
     }
 }
