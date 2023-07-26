@@ -2,7 +2,7 @@ import UIKit
 import CoreLocation
 
 class ViewController: UIViewController {
-
+    
     // MARK: - UIobj
     @IBOutlet weak var refreshButton: UIButton! {
         didSet {
@@ -80,10 +80,10 @@ class ViewController: UIViewController {
             // 이미지를 표시할 CALayer를 생성합니다.
             let imageLayer = CALayer()
             imageLayer.contents = image.cgImage
-                
+            
             // 이미지 레이어의 프레임을 설정하여 이미지가 화면에 맞게 조절되도록 합니다.
             imageLayer.frame = self.view.bounds
-                
+            
             // 이미지 레이어를 self.view의 가장 아래에 추가합니다.
             self.view.layer.insertSublayer(imageLayer, at: 0)
             

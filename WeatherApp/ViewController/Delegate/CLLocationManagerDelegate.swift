@@ -3,11 +3,7 @@ import CoreLocation
 
 extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-//        guard status != .notDetermined else {
-//            print("권한 초기 설정")
-//            getLocationUsagePermission()
-//            return
-//        }
+        
         switch status {
             case .authorizedAlways, .authorizedWhenInUse:
                 print("GPS 권한 설정됨")
